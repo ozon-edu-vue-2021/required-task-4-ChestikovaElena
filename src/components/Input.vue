@@ -2,9 +2,9 @@
   <div class="input-wrapper">
     <label for="id" class="input-label">{{ label }}</label>
     <input class="input"
-      :id="id"
       :type="type"
       :placeholder="placeholder"
+      v-mask="mask"
       v-model="value"
       @input="inputHandler($event.target.value)"
     />
@@ -23,10 +23,6 @@ import { VueMaskDirective } from "v-mask";
 export default {
   name: "Input",
   props: {
-    id: {
-      type: String,
-      required: true,
-    },
     type: {
       type: String,
       default: "text",

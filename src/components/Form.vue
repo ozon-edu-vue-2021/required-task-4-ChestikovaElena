@@ -6,21 +6,21 @@
         <div class="row">
           <Input
             v-model="formData.secondName"
-            id="secondName"
+            key="secondName"
             label="Фамилия"
             placeholder="Иванов"
             dataError="formData.secondNameErrors"
           />
           <Input
             v-model="formData.name"
-            id="name"
+            key="name"
             label="Имя"
             placeholder="Иван"
             dataError=""
           />
           <Input
             v-model="formData.patronym"
-            id="patronym"
+            key="patronym"
             label="Отчество"
             placeholder="Иванович"
             dataError=""
@@ -29,7 +29,7 @@
         <div class="row">
           <Input
             v-model="formData.birthDay"
-            id="birthDay"
+            key="birthDay"
             type="date"
             label="Дата рождения"
             dataError=""
@@ -38,7 +38,7 @@
         <div class="row">
           <Input
             v-model="formData.email"
-            id="email"
+            key="email"
             type="email"
             label="E-mail"
             placeholder="test-email@mail.com"
@@ -57,6 +57,7 @@
         <h2 class="section-title">Паспортные данные</h2>
         <div class="row">
           <Select
+            key="nationality"
             :values="citizenships"
             label="Гражданство"
             placeholder="Выберите национальность"
@@ -71,19 +72,23 @@
           <div class="row">
             <Input
               v-model="formData.passport.series"
-              id="passportSeries"
+              key="passportSeries"
+              mask="## ##"
+              placeholder="00 00"
               label="Серия паспорта"
               dataError=""
             />
             <Input
               v-model="formData.passport.number"
-              id="passportNumber"
+              key="passportNumber"
+              mask="№ ######"
+              placeholder="№ 000000"
               label="Номер паспорта"
               dataError=""
             />
             <Input
               v-model="formData.passport.issuanceDate"
-              id="passporIssuanceDate"
+              key="passporIssuanceDate"
               type="date"
               label="Дата выдачи"
               dataError=""
@@ -94,13 +99,13 @@
           <div class="row row-modify--half">
             <Input
               v-model="formData.stranger.lastName"
-              id="strangerLastName"
+              key="strangerLastName"
               label="Фамилия на латинице"
               dataError=""
             />
             <Input
               v-model="formData.stranger.name"
-              id="strangerName"
+              key="strangerName"
               label="Имя на латинице"
               dataError=""
             />
@@ -108,17 +113,19 @@
           <div class="row row-modify--passport">
             <Input
               v-model="formData.stranger.passport.number"
-              id="strangerPassportNumber"
+              key="strangerPassportNumber"
               label="Номер паспорта"
               dataError=""
             />
             <Select
+              key="passportCountry"
               :values="citizenships"
               label="Страна выдачи"
               field="nationality"
               @selected="updatePassportCountry"
             />
             <Select
+              key="passportType"
               :values="passportTypes"
               label="Тип паспорта"
               field="type"
@@ -136,15 +143,15 @@
         <div v-if="isShowChangedName" class="row row-modify--half">
           <Input
             v-model="formData.changedLastName"
-            id="changedLastName"
-            label="Фамилия"
-            dataError="formData.changedLastNameErrors"
+            key="changedLastName"
+            label="Предыдущая фамилия"
+            dataError=""
           />
           <Input
             v-model="formData.changedName"
-            id="changedName"
-            label="Имя"
-            dataError="formData.changedNameErrors"
+            key="changedName"
+            label="Предыдущее имя"
+            dataError=""
           />
         </div>
       </section>
@@ -177,7 +184,6 @@ export default {
   },
   data() {
     return {
-      timeMask: null,
       citizenships: null,
       passportTypes: null,
       formData: {
