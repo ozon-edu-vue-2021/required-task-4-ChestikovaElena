@@ -9,7 +9,9 @@
           :placeholder="placeholder"
           @focus="focusHandler"
         >
-        <Icon iconType="arrow" />
+        <div class="icon-wrapper">
+          <Icon iconType="arrow" />
+        </div>
         <div
           v-if="isDropdownOpen"
           class="selector___dropdown"
@@ -39,7 +41,7 @@
 <script>
 import ClickOutside from "vue-click-outside";
 import Icon from "./Icon.vue";
-import { debounce } from "@/utils/helper.js";
+import _ from "lodash";
 
 export default {
   name: "Select",
@@ -52,7 +54,7 @@ export default {
   props: {
     values: {
       type: Array,
-      default: () => {[]}
+      required: true,
     },
     label: {
       type: String,
@@ -78,7 +80,7 @@ export default {
   },
   created() {
     this.getValues(this.searchValue);
-    this.debounceSearchValues = debounce(this.getValues, 1000);
+    this.debounceSearchValues = _.debounce(this.getValues, 1000);
   },
   watch: {
     searchValue(newValue) {
@@ -143,6 +145,7 @@ export default {
   padding-left: 10px;
   list-style: none;
   position: absolute;
+  z-index: 999;
   background-color: #fff;
 }
 
@@ -156,6 +159,16 @@ export default {
 
 .selector-item:hover {
   border-color: #9b9d9f;
+}
+
+.icon-wrapper {
+  position: absolute;
+  right: 0;
+  top: 30px;
+}
+
+.icon-wrapper {
+  fill: #9b9d9f;
 }
 
 </style>

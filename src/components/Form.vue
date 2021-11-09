@@ -1,48 +1,58 @@
 <template>
   <div class="form">
-    <form @submit.prevent="formSubmit" class="form-content">
+    <form @submit.prevent="formSubmit" class="form-content" novalidate>
       <section class="form-section">
         <h2 class="section-title">Личные данные</h2>
         <div class="row">
           <Input
-            v-model="formData.secondName"
+            v-model="$v.formData.secondName.$model"
             key="secondName"
             label="Фамилия"
             placeholder="Иванов"
-            dataError="formData.secondNameErrors"
+            :dataError="error.secondName"
+            :dirty="$v.formData.secondName.$dirty"
+            @blur="blurHandler('secondName')"
           />
           <Input
-            v-model="formData.name"
-            key="name"
+            v-model="$v.formData.firstName.$model"
+            key="firstName"
             label="Имя"
             placeholder="Иван"
-            dataError=""
+            :dataError="error.firstName"
+            :dirty="$v.formData.firstName.$dirty"
+            @blur="blurHandler('firstName')"
           />
           <Input
-            v-model="formData.patronym"
+            v-model="$v.formData.patronym.$model"
             key="patronym"
             label="Отчество"
             placeholder="Иванович"
-            dataError=""
+            :dirty="$v.formData.patronym.$dirty"
+            :dataError="error.patronym"
+            @blur="blurHandler('patronym')"
           />
         </div>
         <div class="row">
           <Input
-            v-model="formData.birthDay"
+            v-model="$v.formData.birthDay.$model"
             key="birthDay"
             type="date"
             label="Дата рождения"
-            dataError=""
+            :dataError="error.birthDay"
+            :dirty="$v.formData.birthDay.$dirty"
+            @blur="blurHandler('birthDay')"
           />
         </div>
         <div class="row">
           <Input
-            v-model="formData.email"
+            v-model="$v.formData.email.$model"
             key="email"
             type="email"
             label="E-mail"
             placeholder="test-email@mail.com"
-            dataError=""
+            :dataError="error.email"
+            :dirty="$v.formData.email.$dirty"
+            @blur="blurHandler('email')"
           />
         </div>
         <div>
@@ -71,20 +81,24 @@
         >
           <div class="row">
             <Input
-              v-model="formData.passport.series"
+              v-model="$v.formData.passport.series.$model"
               key="passportSeries"
               mask="## ##"
               placeholder="00 00"
               label="Серия паспорта"
-              dataError=""
+              :dataError="error.passport.series"
+              :dirty="$v.formData.passport.series.$dirty"
+              @blur="blurHandler('series')"
             />
             <Input
-              v-model="formData.passport.number"
+              v-model="$v.formData.passport.number.$model"
               key="passportNumber"
               mask="№ ######"
               placeholder="№ 000000"
               label="Номер паспорта"
-              dataError=""
+              :dataError="error.passport.number"
+              :dirty="$v.formData.passport.number.$dirty"
+              @blur="blurHandler('number')"
             />
             <Input
               v-model="formData.passport.issuanceDate"
@@ -98,16 +112,20 @@
         <div v-else class="form-section">
           <div class="row row-modify--half">
             <Input
-              v-model="formData.stranger.lastName"
+              v-model="$v.formData.stranger.lastName.$model"
               key="strangerLastName"
               label="Фамилия на латинице"
-              dataError=""
+              :dataError="error.stranger.lastName"
+              :dirty="$v.formData.stranger.lastName.$dirty"
+              @blur="blurHandler('lastName')"
             />
             <Input
-              v-model="formData.stranger.name"
+              v-model="$v.formData.stranger.name.$model"
               key="strangerName"
               label="Имя на латинице"
-              dataError=""
+              :dataError="error.stranger.name"
+              :dirty="$v.formData.stranger.name.$dirty"
+              @blur="blurHandler('name')"
             />
           </div>
           <div class="row row-modify--passport">
@@ -136,22 +154,35 @@
         <div>
           <h3 class="radio-label">Меняли ли фамилию или имя?</h3>
           <div class="row row-modify--radio">
-            <RadioButton label="Нет" value="no" v-model="formData.isChangedName" />
-            <RadioButton label="Да" value="yes" v-model="formData.isChangedName" />
+            <RadioButton
+              label="Нет"
+              value="no"
+              v-model="formData.isChangedName"
+              @change="changeHandler"
+            />
+            <RadioButton
+              label="Да"
+              value="yes"
+              v-model="formData.isChangedName"
+            />
           </div>
         </div>
         <div v-if="isShowChangedName" class="row row-modify--half">
           <Input
-            v-model="formData.changedLastName"
+            v-model="$v.formData.changedLastName.$model"
             key="changedLastName"
             label="Предыдущая фамилия"
-            dataError=""
+            :dataError="error.changedLastName"
+            :dirty="$v.formData.changedLastName.$dirty"
+            @blur="blurHandler('changedLastName')"
           />
           <Input
-            v-model="formData.changedName"
+            v-model="$v.formData.changedName.$model"
             key="changedName"
             label="Предыдущее имя"
-            dataError=""
+            :dataError="error.changedName"
+            :dirty="$v.formData.changedName.$dirty"
+            @blur="blurHandler('changedName')"
           />
         </div>
       </section>
@@ -175,6 +206,12 @@ import RadioButton from "./RadioButton.vue";
 import Select from "./Select.vue";
 import citizenships from "@/assets/data/citizenships.json";
 import passportTypes from "@/assets/data/passport-types.json";
+import { email, helpers, required } from "vuelidate/lib/validators";
+
+const cyrilicLetter = helpers.regex("cyrilicLetter", /^[\u0400-\u04ff]*$/);
+const latinLetter = helpers.regex("latinLetter", /^[a-zA-Z]*$/);
+const formatSeries = helpers.regex("lengthFour", /^\d{2} \d{2}$/);
+const formatNumber = helpers.regex("lengthFour", /^№ \d{6}$/);
 
 export default {
   components: {
@@ -182,13 +219,15 @@ export default {
     RadioButton,
     Select,
   },
+  const: {
+    citizenships: null,
+    passportTypes: null,
+  },
   data() {
     return {
-      citizenships: null,
-      passportTypes: null,
       formData: {
         secondName: "",
-        name: "",
+        firstName: "",
         patronym: "",
         birthDay: null,
         email: "",
@@ -208,10 +247,27 @@ export default {
             country: "",
             type: "",
           },
-          lastNmae: "",
+          lastName: "",
           name: "",
         }
-      }
+      },
+      error: {
+        secondName: "",
+        firstName: "",
+        patronym: "",
+        changedLastName: "",
+        changedName: "",
+        birthDay: "",
+        email: "",
+        passport: {
+          series: "",
+          number: ""
+        },
+        stranger: {
+          lastName: "",
+          name:"",
+        },
+      },
     };
   },
   computed: {
@@ -219,32 +275,57 @@ export default {
       return this.formData.isChangedName === 'yes'
     },
     isButtonDisabled() {
-      return !(
-        this.formData.secondName !== "" &&
-        this.formData.name !== "" &&
-        this.formData.birthDay &&
-        this.formData.email &&
-        this.formData.gender &&
-        ((this.formData.nationality === "Russia" &&
-          this.formData.passport.series !== "" &&
-          this.formData.passport.number !== "" &&
-          this.formData.passport.issuanceDate !== ""
-        ) || (this.formData.nationality !== "Russia" && 
-          this.formData.stranger.passport.number !== "" &&
-          this.formData.stranger.passport.country !== "" &&
-          this.formData.stranger.passport.type !== ""
-        )) &&
-        ((this.formData.isChangedName === "no") ||
-        (this.formData.isChangedName === "yes" &&
-          this.formData.changedLastName !== "" &&
-          this.formData.changedName !== ""
-        ))
-      )
-    }
+      return this.$v.$invalid;
+    },
   },
   created() {
     this.citizenships = citizenships;
     this.passportTypes = passportTypes;
+  },
+  validations: {
+    formData: {
+      secondName: {
+        required,
+        cyrilicLetter,
+      },
+      firstName: {
+        required,
+        cyrilicLetter,
+      },
+      patronym: {
+        cyrilicLetter,
+      },
+      changedLastName: {
+        cyrilicLetter,
+      },
+      changedName: {
+        cyrilicLetter,
+      },
+      birthDay: {
+        required,
+        maxValue: value => value < new Date().toISOString(),
+      },
+      email: {
+        required,
+        email,
+      },
+      passport: {
+        series: {
+          formatSeries,
+        },
+        number: {
+          formatNumber,
+        }
+      },
+      stranger: {
+        lastName: {
+          latinLetter
+        },
+        name: {
+          latinLetter
+        },
+      }
+    }
   },
   methods: {
     formSubmit() {
@@ -257,6 +338,23 @@ export default {
       }
     },
     updateNationality(value) {
+      if (value !== "Russia") {
+        this.formData.passport = {
+          series: "",
+          number: "",
+          issuanceDate: "",
+        };
+      }  else {
+        this.formData.stranger = {
+          passport: {
+            number: "",
+            country: "",
+            type: "",
+          },
+          lastName: "",
+          name: "",
+        };
+      }
       this.formData.nationality = value;
     },
     updatePassportType(value) {
@@ -264,6 +362,67 @@ export default {
     },
     updatePassportCountry(value) {
       this.formData.stranger.passport.country = value;
+    },
+    changeHandler() {
+      this.formData.changedLastName = "";
+      this.formData.changedName = "";
+    },
+    blurHandler(validateField) {
+      if (validateField === "secondName" || validateField === "firstName") {
+        if (!this.$v.formData[validateField].required && this.$v.formData[validateField].$dirty) {
+          this.error[validateField] = "Обязательно для заполнения";
+        } else if (!this.$v.formData[validateField].cyrilicLetter && this.$v.formData[validateField].$dirty) {
+          this.error[validateField] = "Можно использовать только русские буквы"
+        } else {
+          this.error[validateField] = "";
+        }
+      }
+      if (validateField === "patronym" || validateField === "changedLastName" || validateField === "changedName") {
+        if (!this.$v.formData[validateField].cyrilicLetter && this.$v.formData[validateField].$dirty) {
+          this.error[validateField] = "Можно использовать только русские буквы";
+        } else {
+          this.error[validateField] = "";
+        }
+      }
+      if (validateField === "lastName" || validateField === "name") {
+        if (!this.$v.formData.stranger[validateField].latinLetter && this.$v.formData.stranger[validateField].$dirty) {
+          this.error.stranger[validateField] = "Можно использовать только латинские буквы";
+        } else {
+          this.error.stranger[validateField] = "";
+        }
+      }
+      if (validateField === "birthDay") {
+        if (!this.$v.formData[validateField].required && this.$v.formData[validateField].$dirty) {
+          this.error[validateField] = "Обязательно для заполнения";
+        } else if (!this.$v.formData[validateField].maxValue && this.$v.formData[validateField].$dirty) {
+          this.error[validateField] = "Дата не может быть больше сегодняшней даты"
+        } else {
+          this.error[validateField] = "";
+        }
+      }
+      if (validateField === "email") {
+        if (!this.$v.formData[validateField].required && this.$v.formData[validateField].$dirty) {
+          this.error[validateField] = "Обязательно для заполнения";
+        } else if (!this.$v.formData[validateField].email && this.$v.formData[validateField].$dirty) {
+          this.error[validateField] = "Введите корректный email"
+        } else {
+          this.error[validateField] = "";
+        }
+      }
+      if (validateField === "series") {
+        if (!this.$v.formData.passport[validateField].formatSeries && this.$v.formData.passport[validateField].$dirty) {
+          this.error.passport[validateField] = "Введите серию паспорта из 4-х цифр"
+        } else {
+          this.error.passport[validateField] = "";
+        }
+      }
+      if (validateField === "number") {
+        if (!this.$v.formData.passport[validateField].formatNumber && this.$v.formData.passport[validateField].$dirty) {
+          this.error.passport[validateField] = "Введите номер паспорта из 6-и цифр"
+        } else {
+          this.error.passport[validateField] = "";
+        }
+      }
     }
   },
 };
@@ -281,7 +440,7 @@ export default {
 
 .form-section {
   display: grid;
-  grid-gap: 20px;
+  grid-gap: 25px;
   width: 1000px;
   margin-top: 30px;
 }
@@ -293,7 +452,7 @@ export default {
 
 .row {
   display: grid;
-  grid-template-columns: auto auto auto;
+  grid-template-columns: 1fr 1fr 1fr;
   grid-gap: 20px;
 }
 

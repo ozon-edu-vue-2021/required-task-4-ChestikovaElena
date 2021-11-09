@@ -1,8 +1,6 @@
 <template>
   <div
-    :class="['icon__wrapper', {
-        'icon__wrapper--active': isActive
-      }]"
+    class="icon__wrapper"
   >
     <svg
       width="24"
@@ -25,11 +23,6 @@ export default {
       default: 'home'
     }
   },
-  computed: {
-    isActive() {
-      return false;
-    }
-  },
   data: () => ({
     types: {
       arrow:
@@ -50,13 +43,10 @@ export default {
   display: flex;
   align-items: center;
   justify-content: center;
-  position: absolute;
-  right: 0;
-  top: 30px;
 }
 
 .icon {
-  fill: #9b9d9f;
+  fill: inherit;
 }
 
 </style>
