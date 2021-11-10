@@ -274,8 +274,41 @@ export default {
     isShowChangedName() {
       return this.formData.isChangedName === 'yes'
     },
+    hasDataForRussian() {
+      return (
+        this.formData.nationality === "Russia" &&
+        this.formData.passport.series !== "" &&
+        this.formData.passport.number !== "" &&
+        this.formData.passport.issuanceDate !== ""
+      )
+    },
+    hasDataForStranger() {
+      return (
+        this.formData.nationality !== "Russia" && 
+        this.formData.stranger.passport.number !== "" &&
+        this.formData.stranger.passport.country !== "" &&
+        this.formData.stranger.passport.type !== ""
+      )
+    },
+    hasDataForChangedName() {
+      return (
+        this.formData.isChangedName === "yes" &&
+        this.formData.changedLastName !== "" &&
+        this.formData.changedName !== ""
+      )
+    },
     isButtonDisabled() {
-      return this.$v.$invalid;
+      return !(
+        !this.$v.$invalid &&
+        this.formData.gender &&
+        (
+          this.hasDataForRussian ||
+          this.hasDataForStranger
+        ) && (
+          this.formData.isChangedName === "no" ||
+          this.hasDataForChangedName
+        )
+      );
     },
   },
   created() {
