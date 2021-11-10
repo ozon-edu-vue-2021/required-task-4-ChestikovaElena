@@ -207,6 +207,7 @@ import Select from "./Select.vue";
 import citizenships from "@/assets/data/citizenships.json";
 import passportTypes from "@/assets/data/passport-types.json";
 import { email, helpers, required } from "vuelidate/lib/validators";
+import _ from "lodash";
 
 const cyrilicLetter = helpers.regex("cyrilicLetter", /^[\u0400-\u04ff]*$/);
 const latinLetter = helpers.regex("latinLetter", /^[a-zA-Z]*$/);
@@ -363,11 +364,14 @@ export default {
   methods: {
     formSubmit() {
       if (!this.isButtonDisabled) {
-        if (!this.formData.emailErrors) {
-          console.log("UPDATE API EVENT", this.formData);
-        } else {
-          console.log("FAILED UPDATE API EVENT");
+        let formDataFinally = this.formData;
+        if (this.hasDataForRussian) {
+          formDataFinally.stranger = {}
+        } else if (this.hasDataForStranger) {
+          formDataFinally.passport = {}
         }
+        formDataFinally = _.omitBy(formDataFinally, _.isEmpty);
+        console.log("UPDATE API EVENT", formDataFinally);
       }
     },
     updateNationality(value) {
