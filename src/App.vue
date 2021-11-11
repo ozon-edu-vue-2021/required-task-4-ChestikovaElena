@@ -19,7 +19,7 @@ export default {
 #app {
   font-family: Avenir, Helvetica, Arial, sans-serif;
   color: #2c3e50;
-  background-color: #fafafa;
+  background-color: #fff;
   padding: 24px;
   box-sizing: border-box;
 }
